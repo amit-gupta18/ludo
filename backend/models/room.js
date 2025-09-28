@@ -16,6 +16,7 @@ const RoomSchema = new mongoose.Schema({
     rolledNumber: Number,
     players: [PlayerSchema],
     winner: { type: String, default: null },
+    playerScores: { type: Map, of: Number, default: () => new Map() },
     pawns: {
         type: [PawnSchema],
         default: () => {
@@ -37,12 +38,17 @@ const RoomSchema = new mongoose.Schema({
 
 RoomSchema.methods.beatPawns = function (position, attackingPawnColor) {
     const pawnsOnPosition = this.pawns.filter(pawn => pawn.position === position);
+    const capturedPawns = [];
+    
     pawnsOnPosition.forEach(pawn => {
         if (pawn.color !== attackingPawnColor) {
             const index = this.getPawnIndex(pawn._id);
-            this.pawns[index].position = this.pawns[index].basePos;
+            capturedPawns.push(this.pawns[index]); // Store reference before resetting
+            // Note: Position reset will be handled by handleCapture in scoring.js
         }
     });
+    
+    return capturedPawns;
 };
 
 RoomSchema.methods.changeMovingPlayer = function () {
@@ -61,9 +67,24 @@ RoomSchema.methods.changeMovingPlayer = function () {
 };
 
 RoomSchema.methods.movePawn = function (pawn) {
+    const { addPawnProgress, handleCapture } = require('../utils/scoring');
+    
     const newPositionOfMovedPawn = pawn.getPositionAfterMove(this.rolledNumber);
     this.changePositionOfPawn(pawn, newPositionOfMovedPawn);
-    this.beatPawns(newPositionOfMovedPawn, pawn.color);
+    
+    // Add progress scoring
+    addPawnProgress(pawn, this.rolledNumber);
+    
+    // Handle captures with scoring
+    const capturedPawns = this.beatPawns(newPositionOfMovedPawn, pawn.color);
+    if (capturedPawns && capturedPawns.length > 0) {
+        capturedPawns.forEach(victim => {
+            handleCapture(pawn, victim);
+        });
+    }
+    
+    // Update all player scores
+    this.updatePlayerScores();
 };
 
 RoomSchema.methods.getPawnsThatCanMove = function () {
@@ -86,6 +107,10 @@ RoomSchema.methods.startGame = function () {
     this.nextMoveTime = Date.now() + MOVE_TIME;
     this.players.forEach(player => (player.ready = true));
     this.players[0].nowMoving = true;
+    
+    // Initialize all player scores to 0 when game starts
+    this.updatePlayerScores();
+    
     timeoutManager.set(makeRandomMove, MOVE_TIME, this._id.toString());
 };
 
@@ -127,12 +152,17 @@ RoomSchema.methods.getPlayer = function (playerId) {
 
 RoomSchema.methods.addPlayer = function (name, id) {
     if (this.full) return;
+    const playerId = new mongoose.Types.ObjectId();
     this.players.push({
+        _id: playerId,
         sessionID: id,
         name: name,
         ready: false,
         color: COLORS[this.players.length],
     });
+    
+    // Initialize player score
+    this.playerScores.set(playerId.toString(), 0);
 };
 
 RoomSchema.methods.getPawnIndex = function (pawnId) {
@@ -149,6 +179,14 @@ RoomSchema.methods.getPlayerPawns = function (color) {
 
 RoomSchema.methods.getCurrentlyMovingPlayer = function () {
     return this.players.find(player => player.nowMoving === true);
+};
+
+RoomSchema.methods.updatePlayerScores = function () {
+    this.players.forEach(player => {
+        const playerPawns = this.getPlayerPawns(player.color);
+        const totalScore = playerPawns.reduce((acc, pawn) => acc + pawn.score, 0);
+        this.playerScores.set(player._id.toString(), totalScore);
+    });
 };
 
 const Room = mongoose.model('Room', RoomSchema);

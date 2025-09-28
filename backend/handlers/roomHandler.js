@@ -1,5 +1,6 @@
 const { getRooms, getRoom, updateRoom, createNewRoom } = require('../services/roomService');
 const { sendToOnePlayerRooms, sendToOnePlayerData, sendWinner } = require('../socket/emits');
+const socketManager = require('../socket/socketManager');
 
 module.exports = socket => {
     const req = socket.request;
@@ -13,6 +14,20 @@ module.exports = socket => {
             await updateRoom(room);
         }
         sendToOnePlayerData(socket.id, room);
+        
+        // Send current scores if game has started
+        if (room.started) {
+            room.updatePlayerScores();
+            const scoreObject = {};
+            room.playerScores.forEach((score, playerId) => {
+                scoreObject[playerId] = score;
+            });
+            
+            socketManager.getIO()
+                .to(room._id.toString())
+                .emit("game:scores", scoreObject);
+        }
+        
         if (room.winner) sendWinner(socket.id, room.winner);
     };
 

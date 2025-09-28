@@ -6,6 +6,9 @@ const PawnSchema = new Schema({
     color: String,
     basePos: Number,
     position: Number,
+    score: { type: Number, default: 0 },
+    captures: { type: Number, default: 0 }, // for deciding the tie breaker . 
+
 });
 
 PawnSchema.methods.canMove = function (rolledNumber) {

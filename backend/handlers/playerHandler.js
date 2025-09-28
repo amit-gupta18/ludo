@@ -1,5 +1,6 @@
 const { getRoom, updateRoom } = require('../services/roomService');
 const { COLORS } = require('../utils/constants');
+const socketManager = require('../socket/socketManager');
 
 module.exports = socket => {
     const req = socket.request;
@@ -25,14 +26,34 @@ module.exports = socket => {
         room.getPlayer(req.session.playerId).changeReadyStatus();
         if (room.canStartGame()) {
             room.startGame();
+            
+            // Emit initial scores when game starts
+            const scoreObject = {};
+            room.playerScores.forEach((score, playerId) => {
+                scoreObject[playerId] = score;
+            });
+            
+            socketManager.getIO()
+                .to(room._id.toString())
+                .emit("game:scores", scoreObject);
         }
         await updateRoom(room);
     };
 
     const addPlayerToExistingRoom = async (room, data) => {
-        room.addPlayer(data.name);
+        room.addPlayer(data.name, socket.id);
         if (room.isFull()) {
             room.startGame();
+            
+            // Emit initial scores when game starts
+            const scoreObject = {};
+            room.playerScores.forEach((score, playerId) => {
+                scoreObject[playerId] = score;
+            });
+            
+            socketManager.getIO()
+                .to(room._id.toString())
+                .emit("game:scores", scoreObject);
         }
         await updateRoom(room);
         reloadSession(room);

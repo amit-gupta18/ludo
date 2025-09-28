@@ -7,6 +7,7 @@ const rollDice = () => {
 
 const makeRandomMove = async roomId => {
     const { updateRoom, getRoom } = require('../services/roomService');
+    const socketManager = require('../socket/socketManager');
     const room = await getRoom(roomId);
     if (room.winner) return;
     if (room.rolledNumber === null) {
@@ -18,6 +19,16 @@ const makeRandomMove = async roomId => {
     if (pawnsThatCanMove.length > 0) {
         const randomPawn = pawnsThatCanMove[Math.floor(Math.random() * pawnsThatCanMove.length)];
         room.movePawn(randomPawn);
+        
+        // Emit updated scores after random move
+        const scoreObject = {};
+        room.playerScores.forEach((score, playerId) => {
+            scoreObject[playerId] = score;
+        });
+        
+        socketManager.getIO()
+            .to(room._id.toString())
+            .emit("game:scores", scoreObject);
     }
     room.changeMovingPlayer();
     const winner = room.getWinner();

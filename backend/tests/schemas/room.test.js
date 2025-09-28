@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const RoomModel = require('../../schemas/room');
+const RoomModel = require('../../models/room');
 const { getPawnPositionAfterMove, getStartPositions } = require('../../utils/functions');
 describe('Testing room model methods', function () {
     const room = new RoomModel();

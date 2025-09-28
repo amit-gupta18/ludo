@@ -1,0 +1,192 @@
+/* Enhanced Winner Overlay Styles */
+.winnerContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 30px;
+    width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: 3px solid #fff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    animation: popIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.trophyImage {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    animation: bounce 2s infinite;
+}
+
+.gameOverTitle {
+    font-size: 28px;
+    margin: 0 0 20px 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+.winnerSection {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.winnerText {
+    font-size: 22px;
+    margin: 0 0 10px 0;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+.winnerScore {
+    font-size: 16px;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.finalLeaderboard {
+    width: 100%;
+    margin-bottom: 25px;
+}
+
+.finalLeaderboard h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.leaderboardItem {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    margin: 8px 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.leaderboardItem.winnerItem {
+    background: rgba(255, 215, 0, 0.2);
+    border: 2px solid gold;
+    transform: scale(1.02);
+}
+
+.leaderboardItem:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(4px);
+}
+
+.rank {
+    font-weight: bold;
+    font-size: 16px;
+    min-width: 30px;
+    text-align: left;
+}
+
+.playerInfo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    justify-content: flex-start;
+    margin-left: 10px;
+}
+
+.colorIndicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    flex-shrink: 0;
+}
+
+.finalScore {
+    font-weight: bold;
+    min-width: 60px;
+    text-align: right;
+}
+
+.playAgainButton {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 15px rgba(238, 90, 36, 0.4);
+}
+
+.playAgainButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(238, 90, 36, 0.6);
+    background: linear-gradient(45deg, #ee5a24, #ff6b6b);
+}
+
+.playAgainButton:active {
+    transform: translateY(0);
+}
+
+/* Animations */
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-10px);
+    }
+    60% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+    to {
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .winnerContainer {
+        width: 90vw;
+        max-width: 350px;
+        padding: 25px 20px;
+    }
+    
+    .gameOverTitle {
+        font-size: 24px;
+    }
+    
+    .winnerText {
+        font-size: 18px;
+    }
+}
